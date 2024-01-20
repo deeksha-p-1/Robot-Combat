@@ -1,0 +1,64 @@
+// Define motor control pins
+const int motorA1 = 2; // Motor A input 1
+const int motorA2 = 3; // Motor A input 2
+const int motorB1 = 4; // Motor B input 1
+const int motorB2 = 5; // Motor B input 2
+
+// Define receiver input pins
+const int ch1InputPin = A0; // Channel 1 input pin (connect to receiver's throttle channel)
+const int ch2InputPin = A1; // Channel 2 input pin (connect to receiver's steering channel)
+
+// Variables to store receiver values
+int ch1Value; // Throttle value
+int ch2Value; // Steering value
+
+// Function to control motor speed and direction
+void motorControl(int motorPin1, int motorPin2, int speed) {
+  if (speed > 0) {
+    digitalWrite(motorPin1, HIGH);
+    digitalWrite(motorPin2, LOW);
+    analogWrite(speed, speed); // Adjust the motor speed using PWM (0-255)
+  } else if (speed < 0) {
+    digitalWrite(motorPin1, LOW);
+    digitalWrite(motorPin2, HIGH);
+    analogWrite(-speed, -speed); // Adjust the motor speed using PWM (0-255)
+  } else {
+    digitalWrite(motorPin1, LOW);
+    digitalWrite(motorPin2, LOW);
+    analogWrite(speed, 0); // Stop the motor (set speed to 0)
+  }
+}
+
+void setup() {
+  // Set motor control pins as OUTPUT
+  pinMode(motorA1, OUTPUT);
+  pinMode(motorA2, OUTPUT);
+  pinMode(motorB1, OUTPUT);
+  pinMode(motorB2, OUTPUT);
+  
+  // Initialize serial communication (optional, for debugging)
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Read receiver values
+  ch1Value = analogRead(ch1InputPin);
+  ch2Value = analogRead(ch2InputPin);
+  
+  // Map the receiver values to motor speed values (-255 to 255)
+  int motorASpeed = map(ch1Value, 0, 1023, -255, 255);
+  int motorBSpeed = map(ch2Value, 0, 1023, -255, 255);
+  
+  // Control the motors based on receiver values
+  motorControl(motorA1, motorA2, motorASpeed);
+  motorControl(motorB1, motorB2, motorBSpeed);
+  
+  // Display receiver values (optional, for debugging)
+  Serial.print("Throttle: ");
+  Serial.print(ch1Value);
+ Serial.print(", Steering: ");
+  Serial.println(ch2Value);
+  
+  // Add a small delay for stability (adjust as needed)
+  delay(50);
+}
